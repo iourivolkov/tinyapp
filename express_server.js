@@ -17,11 +17,21 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
 // add route to json url database
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
 // add route --> app.get(path, callback)
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
+// add new route handler for /urls and use res.render() to pass URL data to our template
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  // res.render (template, object containing vars to pass into template)
+  res.render("urls_index", templateVars);
+
+})
