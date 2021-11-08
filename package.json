@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/iourivolkov/tinyapp/issues"
   },
-  "homepage": "https://github.com/iourivolkov/tinyapp#readme"
+  "homepage": "https://github.com/iourivolkov/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
