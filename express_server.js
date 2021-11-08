@@ -33,5 +33,11 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   // res.render (template, object containing vars to pass into template)
   res.render("urls_index", templateVars);
-
 })
+
+// add a second route and template
+// ":" indicates shortURL is a route parameter
+app.get("/urls/:shortUrl", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.longURL };
+  res.render("urls_show", templateVars);
+});
