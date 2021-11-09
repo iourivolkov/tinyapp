@@ -38,6 +38,7 @@ app.get("/urls", (req, res) => {
 // add a second route and template
 // ":" indicates shortURL is a route parameter
 app.get("/urls/:shortUrl", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.longURL };
+
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortUrl] };
   res.render("urls_show", templateVars);
 });
