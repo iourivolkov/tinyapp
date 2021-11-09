@@ -7,12 +7,13 @@
 </head>
 
 <body>
+<%- include ('_header'); %>
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
-        <button type="button"><a href="#">Shorten new URL</a></button>
+        <h6><button type="button" <a href='#'>Click here</a> to shorten a new URL</button></h6>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
