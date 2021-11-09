@@ -5,6 +5,21 @@ const PORT = 8080; // default port 8080
 // set ejs as view engine --> tells app 
 app.set("view engine", "ejs");
 
+
+const generateRandomString = () => {
+  let output = ' ';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789';
+  const charLength = characters.length;
+  const maxRandomStringLength = 6;
+
+  for(let i = 0; i < maxRandomStringLength; i++) {
+    output += characters.charAt(Math.floor(Math.random() * charLength));
+    
+  }
+  return output; 
+  
+}
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -57,8 +72,10 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
-
-
-
 // add a POST route to handle the form submission 
+// logs request body and gives dummy response
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send(generateRandomString());         // Respond with 'Ok' (we will replace this)
+});
+
