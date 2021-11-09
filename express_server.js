@@ -73,13 +73,11 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // add a POST route to handle the form submission 
-// logs request body and gives dummy response
+// logs request body 
 app.post("/urls", (req, res) => {
   console.log(req.body); 
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = {
-    longURL: req.body.longURL
-  }
+  urlDatabase[shortURL] = req.body.longURL;
  // redirect client to new page - page link = randomly generated string
   res.redirect(`/urls/${shortURL}`);   
 });
