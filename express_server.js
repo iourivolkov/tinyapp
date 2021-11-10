@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
 //SERVER SETUP
 // -----------
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 // ROUTE TO JOIN URL DATABASE
@@ -54,6 +54,10 @@ app.get("/urls.json", (req, res) => {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 // extended - allows us to input objects and arrays + primitives
+
+// COOKIE PARSER - MIDDLEWARE - HELPS READ COOKIE VALUES
+// -----------------------------------------------------
+const cookieParser = require("cookie-parser");
 
 
 //ADD ROUTE - HTML settings 
@@ -114,6 +118,18 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');   
   
 });
+
+// POST ROUTE TO UPDATE A RESOURCE 
+// -------------------------------
+app.post("/urls/:shortURL", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+
+  res.redirect("/urls");
+
+});
+
+
+
 
 
 
