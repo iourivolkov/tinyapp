@@ -169,6 +169,16 @@ app.post("/logout", (req, res) => {
 
 });
 
+// REGISTRATION ROUTE - /REGISTER (GET)
+// ------------------------------------
+app.get("/register", (req, res) => {
+ let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
+
+  res.render('urls_register', templateVars);
+
+
+})
+
 
 
 
