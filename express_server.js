@@ -1,8 +1,9 @@
 const express = require("express");
 const morgan = require("morgan");
-
-const app = express();
 app.use(morgan('dev'));
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+const app = express();
 const PORT = 8080; 
 
 // SETS EJS AS VIEW ENGINE
@@ -51,13 +52,14 @@ app.get("/urls.json", (req, res) => {
 // ---------------------------
 // converts request body from a Buffer into a readable string
 // adds the data to the req object under the key - body
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+// const bodyParser = require("body-parser");
+app.use(express.urlencoded({extended: true}));
 // extended - allows us to input objects and arrays + primitives
 
 // COOKIE PARSER - MIDDLEWARE - HELPS READ COOKIE VALUES
 // -----------------------------------------------------
-const cookieParser = require("cookie-parser");
+
+// res.cookie(name, value [, options]) <-- implementation
 
 
 //ADD ROUTE - HTML settings 
@@ -69,7 +71,7 @@ app.get("/hello", (req, res) => {
 // add new route handler for /urls and use res.render() to pass URL data to our template
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { username: req.cookies["username"], urls: urlDatabase };
   // res.render (template, object containing vars to pass into template)
   res.render("urls_index", templateVars);
 })
@@ -127,6 +129,38 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 
 });
+
+// AUTHENTICATION ROUTE 
+// --------------------
+
+// LOGIN ROUTE 
+// -----------
+// set a cookie named username to the value submitted in the request body via login form
+// after server has set the cookie - redirect the browser back to /urls page
+
+app.post("/login", (req, res) => {
+  // what do we want to do with our login route 
+  //const username = req.body.username;
+  // res.json({username}); // returns username
+  res.cookie('username', req.body.username);
+  // redirects to /urls after login
+  res.redirect("/urls"); 
+
+
+  // res only exists inside route authentication
+  // res.json() - sends back a json response 
+  // when we send data as a form - it will be part of the request --> info will be in the body of the request
+  // body is an object 
+  
+  //res.cookie('username', username)
+
+
+  
+});
+
+
+// LOGOUT ROUTE 
+// ------------
 
 
 
