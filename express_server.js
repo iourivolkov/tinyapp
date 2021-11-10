@@ -6,9 +6,11 @@ app.use(morgan('dev'));
 const PORT = 8080; 
 
 // SETS EJS AS VIEW ENGINE
+// -----------------------
 app.set("view engine", "ejs");
 
 // GENERATES RANDOMIZED 6 CHAR STRING
+// ----------------------------------
 const generateRandomString = () => {
   let output = ' ';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789';
@@ -21,27 +23,32 @@ const generateRandomString = () => {
   return output; 
 }
 // DATABSE OBJECT
+// --------------
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
 // TEST GET REQUEST
+// ----------------
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 //SERVER SETUP
+// -----------
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 // ROUTE TO JOIN URL DATABASE
+// --------------------------
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 // MAKES POST REQUEST READABLE
+// ---------------------------
 // converts request body from a Buffer into a readable string
 // adds the data to the req object under the key - body
 const bodyParser = require("body-parser");
@@ -50,6 +57,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 //ADD ROUTE - HTML settings 
+// ------------------------
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
@@ -63,11 +71,13 @@ app.get("/urls", (req, res) => {
 })
 
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE 
+// --------------------------------------------
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
 // SECOND ROUTE & EJS TEMPLATE
+// ---------------------------
 // ":" indicates shortURL is a route parameter
 // shortURL stores in req.params 
 // /urls/:d route 
@@ -77,6 +87,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // POST ROUTE TO HANDLE FORM SUBMISSION
+// ------------------------------------
 app.post("/urls", (req, res) => {
   let uniqueShortURL = generateRandomString();
   urlDatabase[uniqueShortURL] = req.body.longURL;
@@ -84,30 +95,24 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${uniqueShortURL}`);   
 });
 
-// URL database object *
-// const urlDatabase = {
-  // short url : long url
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-// longURL = urlDatabase[shortURL]
-
 // REDIRECT USER TO LONG URL
+// -------------------------
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]; 
-  // longURL = value belonging to the short URL key in URL database
   res.redirect(`http://${longURL}`); 
+  // longURL = value belonging to the short URL key in URL database
   // add http to prevent infinite loop error / relative path error 
   // redirects to actual link - works
 });
 
 // POST ROUTE TO DELETE A RESOURCE
+// -------------------------------
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
   // use js delete operator to remove property from an object
+  delete urlDatabase[req.params.shortURL];
+  // redirects to home page (/urls) once resource is removed
   res.redirect('/urls');   
-  // redirects to home page once resource is removed
+  
 });
 
 
