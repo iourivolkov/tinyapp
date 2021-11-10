@@ -8,19 +8,22 @@
       <div style="text-align: right; clear: left;"class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a> 
-        <form class="form-inline"  method="POST" action="/login"> <!---username login form fix: padding  -->
-          <div class="form-row align-items-center">
-            <div class="col-auto">
-              <label class="sr-only" for="inlineFormInput">Name</label>
-              <input name="username" class="form-control mb-2" id="inlineFormInput" placeholder="username">
-            </div>
-            <div class="col-auto">
-            </div>
-            <div class="col-auto">
-              <button type="submit" class="btn btn-primary mb-2">login</button>
-            </div>
-          </div>
+        <% if (!username) { %>
+        <form class="form-inline my-1" method="POST" action="/login">
+          <div>
+            <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="<%= username %>">
+            <input class="form-control mr-2" type="text" name="username" placeholder="Username" style="width: 150px">
+            <button type="submit" class="btn btn-outline-primary">Login</button>
+          </div> 
         </form>
+        <% } else { %>
+          <form class="form-inline my-1" method="POST" action="/logout">
+            <div>
+               <%= username %>
+              <button type="submit" class="btn btn-outline-primary">Logout</button>
+            </div> <!-- before logout logic implemented - logout by deleting cookies -->
+          </form>
+          <% } %>
       </div>
     </div>
   </nav>
