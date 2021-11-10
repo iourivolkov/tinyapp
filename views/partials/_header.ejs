@@ -1,0 +1,27 @@
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+    <a class="navbar-brand" href="/urls">TinyApp</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div style="text-align: right; clear: left;" class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div style="text-align: right; clear: left;"class="navbar-nav">
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a> 
+        <form class="form-inline"  method="POST" action="/urls/login"> <!---username login form fix: padding & route -->
+          <div class="form-row align-items-center">
+            <div class="col-auto">
+              <label class="sr-only" for="inlineFormInput">Name</label>
+              <input name="username" class="form-control mb-2" id="inlineFormInput" placeholder="username">
+            </div>
+            <div class="col-auto">
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary mb-2">login</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </nav>
+</header>
