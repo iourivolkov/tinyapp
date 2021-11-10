@@ -71,7 +71,7 @@ app.get("/hello", (req, res) => {
 // add new route handler for /urls and use res.render() to pass URL data to our template
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  let templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   // res.render (template, object containing vars to pass into template)
   res.render("urls_index", templateVars);
 })
@@ -79,7 +79,8 @@ app.get("/urls", (req, res) => {
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE 
 // --------------------------------------------
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {username: req.cookies['username']}
+  res.render("urls_new", templateVars);
 });
 
 // SECOND ROUTE & EJS TEMPLATE
@@ -88,7 +89,7 @@ app.get("/urls/new", (req, res) => {
 // shortURL stores in req.params 
 // /urls/:d route 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
   res.render("urls_show", templateVars);
 });
 
