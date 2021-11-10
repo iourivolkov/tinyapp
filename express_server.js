@@ -1,14 +1,16 @@
 const express = require("express");
+const app = express();
 const morgan = require("morgan");
 app.use(morgan('dev'));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
-const app = express();
+
 const PORT = 8080; 
 
 // SETS EJS AS VIEW ENGINE
 // -----------------------
 app.set("view engine", "ejs");
+
 
 // GENERATES RANDOMIZED 6 CHAR STRING
 // ----------------------------------
@@ -62,13 +64,13 @@ app.use(express.urlencoded({extended: true}));
 // res.cookie(name, value [, options]) <-- implementation
 
 
-//ADD ROUTE - HTML settings 
+//ADD ROUTE - HTML settings  
 // ------------------------
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// add new route handler for /urls and use res.render() to pass URL data to our template
+// NEW ROUTE - URLS_INDEX (shows all long and short urls w. option to edit or delete)
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
   let templateVars = { urls: urlDatabase, username: req.cookies['username'] };
@@ -76,14 +78,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 })
 
-// GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE 
+// GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
 // --------------------------------------------
 app.get("/urls/new", (req, res) => {
   let templateVars = {username: req.cookies['username']}
   res.render("urls_new", templateVars);
 });
 
-// SECOND ROUTE & EJS TEMPLATE
+// SECOND ROUTE & EJS TEMPLATE - URLS_SHOW (show short/long urls)
 // ---------------------------
 // ":" indicates shortURL is a route parameter
 // shortURL stores in req.params 
