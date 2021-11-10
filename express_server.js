@@ -155,15 +155,19 @@ app.post("/login", (req, res) => {
   // when we send data as a form - it will be part of the request --> info will be in the body of the request
   // body is an object 
   
-  //res.cookie('username', username)
-
-
-  
+  //res.cookie('username', username) 
 });
 
 
 // LOGOUT ROUTE 
 // ------------
+app.post("/logout", (req, res) => {
+
+  res.clearCookie('username');
+
+  res.redirect("/urls");
+
+});
 
 
 
