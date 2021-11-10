@@ -71,7 +71,7 @@ app.get("/hello", (req, res) => {
 // add new route handler for /urls and use res.render() to pass URL data to our template
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  const templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   // res.render (template, object containing vars to pass into template)
   res.render("urls_index", templateVars);
 })
