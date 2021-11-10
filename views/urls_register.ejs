@@ -16,12 +16,13 @@
 
     <main style="margin: 1em;">
       <h3>Create Account</h3>
-      <form method="POST" action="/register">
+      <form method="POST" action="/urls/register">
         <div class="form-group">
           <label for="email">Email address</label>
           <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" style="width: 250px">
           <label for="password">Password</label>
-          <input type="password" name="password" placeholder="Password" style="width: 250px">
+          <input type="password" name="password" class="form-control" id="exampleInputPassword" aria-describedby="passwordHelp" placeholder="Password" style="width: 250px">
+          <br>
           <button type="submit" class="btn btn-primary">Register</button>
         </div>
         
