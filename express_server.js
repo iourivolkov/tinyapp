@@ -128,7 +128,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 
 // check if given email is already in the usersObj
-const findEmailInDatabase = (email) => {
+const findUserInDatabase = (email) => {
   for (const user in users) { 
     // user = key
     if (users[user].email === email) {
@@ -147,9 +147,16 @@ const findEmailInDatabase = (email) => {
 // set up encrypted cookies - cookies sessions 
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  const user = findUserInDatabase(req.body.email);
+  if (user) {
+
+  }
+
+
   res.redirect("/urls");
 });
+
+
 
   // res only exists inside route authentication
   // res.json() - sends back a json response
@@ -173,14 +180,12 @@ app.get("/register", (req, res) => {
 });
 
 
-
-
 // REGISTRATION HANDLER /REGISTER (POST)
 app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
  if (req.body.email && req.body.password) {
   // if email and password are truthy - are not empty strings
-   if (!findEmailInDatabase(req.body.email)) {
+   if (!findUserInDatabase(req.body.email)) {
       // if email doesnt already exist
       const userID = generateRandomString();
       users[userID] = {
