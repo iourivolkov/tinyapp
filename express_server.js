@@ -84,7 +84,7 @@ app.get("/hello", (req, res) => {
 // NEW ROUTE - URLS_INDEX (shows all long and short urls w. option to edit or delete)
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  let templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  let templateVars = { urls: urlDatabase, user_id: req.cookies['user_id'] };
   // res.render (template, object containing vars to pass into template)
   res.render("urls_index", templateVars);
 })
@@ -92,7 +92,7 @@ app.get("/urls", (req, res) => {
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
 // --------------------------------------------
 app.get("/urls/new", (req, res) => {
-  let templateVars = {username: req.cookies['username']}
+  let templateVars = {user_id: req.cookies['user_id']}
   res.render("urls_new", templateVars);
 });
 
@@ -102,7 +102,7 @@ app.get("/urls/new", (req, res) => {
 // shortURL stored in req.params 
 // /urls/:d route 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: req.cookies['user_id'] };
   res.render("urls_show", templateVars);
 });
 
@@ -154,7 +154,7 @@ app.post("/login", (req, res) => {
   //const username = req.body.username;
   // res.json({username}); // returns username
  
-  res.cookie('username', req.body.username);
+  res.cookie('user_id', req.body.user_id);
   // redirects to /urls after login
   res.redirect("/urls"); 
 
@@ -176,7 +176,7 @@ app.post("/login", (req, res) => {
 // ------------
 app.post("/logout", (req, res) => {
 
-  res.clearCookie('username');
+  res.clearCookie('user_id');
 
   res.redirect("/urls");
 
@@ -185,13 +185,10 @@ app.post("/logout", (req, res) => {
 // REGISTRATION ROUTE - /REGISTER (GET)
 // ------------------------------------
 app.get("/register", (req, res) => {
- let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] }
+ let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: req.cookies['user_id'] }
 
   res.render('urls_register', templateVars);
 });
-
-// REGISTRATION AUTHENTICATOR 
-// --------------------------
 
 
 // REGISTRATION HANDLER /REGISTER (POST)
@@ -201,13 +198,15 @@ app.post("/register", (req, res) => {
     let password = req.body.password;
     let uniqueID = generateRandomString();
 
-    res.cookie("username", uniqueID);
+    res.cookie("user_id", uniqueID);
 
     let templateVars = {
-      username: uniqueID
+      user_id: uniqueID
     };
 
     users[uniqueID] = { id: uniqueID, email: email, password: password };
+
+    // console.log(users);
     
   res.redirect('/urls');
   }
