@@ -7,26 +7,30 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    <title>New URL - TinyApp Example</title>
+    <title>Tiny App</title>
+    
   </head>
 
   <body>
 
-    <%- include('partials/_header', { username }); %>
+    <%- include('partials/_header'); %>
+
 
     <main style="margin: 1em;">
       <h3>Create Account</h3>
-      <form method="POST" action="/urls/register">
-        <div class="form-group">
+     
+      <form method="POST" action="/register">
+        <div class="form-group mb-2">
           <label for="email">Email address</label>
           <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" style="width: 250px">
+          <br>
           <label for="password">Password</label>
           <input type="password" name="password" class="form-control" id="exampleInputPassword" aria-describedby="passwordHelp" placeholder="Password" style="width: 250px">
           <br>
           <button type="submit" class="btn btn-primary">Register</button>
         </div>
-        
       </form>
+      
     </main>
       <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
