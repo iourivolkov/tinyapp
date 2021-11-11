@@ -127,23 +127,35 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 
+// check if given email is already in the usersObj
+const findEmailInDatabase = (email) => {
+  for (const user in users) { 
+    // user = key
+    if (users[user].email === email) {
+    return true;
+  }
+}
+  return false;
+};
+
+
 // LOGIN ROUTE
+// redo login route 
+// check if user can be found in userdatabase
+// if user found in user database => login 
+// set up cookies 
+// set up encrypted cookies - cookies sessions 
+
 app.post("/login", (req, res) => {
-
-  res.cookie('user_id', req.body.user_id);
-  // redirects to /urls after login
+  res.cookie('username', req.body.username);
   res.redirect("/urls");
-
+});
 
   // res only exists inside route authentication
   // res.json() - sends back a json response
   // when we send data as a form - it will be part of the request --> info will be in the body of the request
   // body is an object
-  if (result.err) {
-    console.log(result.err);
-    return res.redirect('/');
-  }
-});
+
 
 // LOGOUT ROUTE
 app.post("/logout", (req, res) => {
@@ -161,24 +173,16 @@ app.get("/register", (req, res) => {
 });
 
 
-// check if given email is already in the usersObj
-const checkIfEmailExists = (email) => {
-  for (const user in users) { 
-    if (users[user].email === email) {
-    return true;
-  }
-}
-  return false;
-};
+
 
 // REGISTRATION HANDLER /REGISTER (POST)
 app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
-  if (req.body.email && req.body.password) {
+ if (req.body.email && req.body.password) {
   // if email and password are truthy - are not empty strings
-    if (!checkIfEmailExists) {
+   if (!findEmailInDatabase(req.body.email)) {
       // if email doesnt already exist
-      const userID = generateRandomString;
+      const userID = generateRandomString();
       users[userID] = {
         userID,
         email: req.body.email,
@@ -188,15 +192,20 @@ app.post('/register', (req, res) => {
       res.cookie('user_id', userID);
       res.redirect('/urls');
       // if email already exists --> send err code (already registered)
-    } else {
+   } else {
       res.status(400).send('<h1>400 Error:</h1><h5> This email is already in use. Please try another email.</h5>')
       // if email exists 
-    }
-  } else {
+      // use header tags to add emphasis
+   }
+ } else {
     res.status(400).send('<h1>400 Error:</h1> <h5>You need both an email and a password to register.</h5>')
      // if user didnt enter email or pw (email or pw are empty)
-  }
+ }
 });
+
+// logout button not appearing
+// registration showing errors only - even if register with unique credentials --> error
+// cookies not registering 
 
 
 
