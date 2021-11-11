@@ -38,6 +38,7 @@ const users = {
   }
 };
 
+
 // users[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
 // users[usersID].email = user@example.com
 
@@ -147,12 +148,12 @@ const findUserInDatabase = (email) => {
 // set up encrypted cookies - cookies sessions 
 
 app.post("/login", (req, res) => {
-  const user = findUserInDatabase(req.body.email);
+  const user = findUserInDatabase(req.body.email, users);
   if (user) {
     // if user exists and password entered matches 
-    if (req.body.password === password) {
+    if (req.body.password === user.password) {
       // set user_id cookie 
-      res.cookie('user_id', user[userID]);
+      res.cookie('user_id', user.userID);
       // redirect to /urls
       res.redirect('/urls');
     } else {
