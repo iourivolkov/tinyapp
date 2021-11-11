@@ -8,12 +8,10 @@ app.use(cookieParser());
 const PORT = 8080;
 
 // SETS EJS AS VIEW ENGINE
-// -----------------------
 app.set("view engine", "ejs");
 
 
 // GENERATES RANDOMIZED 6 CHAR STRING
-// ----------------------------------
 const generateRandomString = () => {
   let output = ' ';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789';
@@ -27,7 +25,6 @@ const generateRandomString = () => {
 }
 
 // USERS OBJECT
-// ------------
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -41,11 +38,10 @@ const users = {
   }
 };
 
-// database[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
-// database[usersID].email = user@example.com
+// users[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
+// users[usersID].email = user@example.com
 
-// DATABSE OBJECT
-// --------------
+// DATABASE OBJECT
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -56,19 +52,16 @@ app.get("/", (req, res) => {
 });
 
 //SERVER SETUP
-// -----------
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 // ROUTE TO JOIN URL DATABASE
-// --------------------------
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 // MAKES POST REQUEST READABLE
-// ---------------------------
 // converts request body from a Buffer into a readable string
 // adds the data to the req object under the key - body
 // const bodyParser = require("body-parser");
@@ -76,7 +69,6 @@ app.use(express.urlencoded({extended: true}));
 // extended - allows us to input objects and arrays + primitives
 
 //ADD ROUTE - HTML settings
-// ------------------------
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
@@ -85,29 +77,26 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
   let templateVars = { urls: urlDatabase, user: users[req.cookies]['user_id'] };
-  // res.render (template, object containing vars to pass into template)
+  console.log(templateVars);
+  // cannot convert object --> primitive value! ***
   res.render("urls_index", templateVars);
 })
 
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
-// --------------------------------------------
 app.get("/urls/new", (req, res) => {
-  let templateVars = {user: users[req.cookies]['user_id']}
+  let templateVars = { user: users[req.cookies]['user_id'] }
   res.render("urls_new", templateVars);
 });
 
 // SECOND ROUTE & EJS TEMPLATE - URLS_SHOW (show short/long urls)
-// ---------------------------
 // ":" indicates shortURL is a route parameter
 // shortURL stored in req.params
-// /urls/:d route
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies]['user_id'] };
   res.render("urls_show", templateVars);
 });
 
 // POST ROUTE TO HANDLE FORM SUBMISSION
-// ------------------------------------
 app.post("/urls", (req, res) => {
   let uniqueShortURL = generateRandomString();
   urlDatabase[uniqueShortURL] = req.body.longURL;
@@ -116,17 +105,14 @@ app.post("/urls", (req, res) => {
 });
 
 // REDIRECT USER TO LONG URL
-// -------------------------
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(`http://${longURL}`);
   // longURL = value belonging to the short URL key in URL database
   // add http to prevent infinite loop error / relative path error
-  // redirects to actual link - works
 });
 
 // POST ROUTE TO DELETE A RESOURCE
-// -------------------------------
 app.post("/urls/:shortURL/delete", (req, res) => {
   // use js delete operator to remove property from an object
   delete urlDatabase[req.params.shortURL];
@@ -136,23 +122,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 // POST ROUTE TO UPDATE A RESOURCE
-// -------------------------------
 app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
 
   res.redirect("/urls");
-
 });
 
 
 // LOGIN ROUTE
-// -----------
 app.post("/login", (req, res) => {
-  // what do we want to do with our login route
-
-  // const result = authenticateUser(user, email, password);
-  //const username = req.body.username;
-  // res.json({username}); // returns username
 
   res.cookie('user_id', req.body.user_id);
   // redirects to /urls after login
@@ -163,68 +141,63 @@ app.post("/login", (req, res) => {
   // res.json() - sends back a json response
   // when we send data as a form - it will be part of the request --> info will be in the body of the request
   // body is an object
-
-  //res.cookie('username', username)
   if (result.err) {
     console.log(result.err);
     return res.redirect('/');
   }
-  return res.json(result.data);
 });
 
 // LOGOUT ROUTE
-// ------------
 app.post("/logout", (req, res) => {
-
   res.clearCookie('user_id');
-
+  // clears cookies associated w. user_id 
+  // redirects user to main page
   res.redirect("/urls");
-
 });
 
 // REGISTRATION ROUTE - /REGISTER (GET)
-// ------------------------------------
 app.get("/register", (req, res) => {
  let templateVars = { user: users[req.cookies]['user_id'] }
-
+ // tempVars - object passsed into ejs for render
   res.render('urls_register', templateVars);
 });
 // check if given email is already in the usersObj
-const checkEmailInDatabase = (email) => {
-  for (const user in users) { if (users[user].email === email) {
+const checkIfEmailExists = (email) => {
+  for (const user in users) { 
+    if (users[user].email === email) {
     return true;
   }
-  }
+}
   return false;
 };
 
 
 // REGISTRATION HANDLER /REGISTER (POST)
-// -------------------------------------
-// update registration error handling / authentication
-
 app.post('/register', (req, res) => {
-  // if email and pass work return truthy & are not found in existing db --> add new user to db
+  // if email and pass word return truthy & are not found in existing db --> add new user to db
   if (req.body.email && req.body.password) {
-    if (!checkEmailInDatabase) {
+  // if email and password are truthy - are not empty strings
+    if (!checkIfEmailExists) {
+      // if email doesnt already exist
       const newUser = {
         id: generateRandomString(),
         email: req.body.email,
         password: req.body.password
+        // new userid = random #, email comes from registration form, pw comes from registration form
       }
       res.cookie('user_id', userID);
       res.redirect('/urls');
-      // if email already in db --> send err code (already registered)
+      // if email already exists --> send err code (already registered)
     } else {
-      res.status(400);
-      res.send('400 Error - This email already exists.')
+      res.status(400).send('400 Error: This email is already in use. Please try another email.')
+      // if email exists 
     }
   } else {
-    res.status(400);
-    res.send('400 Error - Please register with an email and password.')
+    res.status(400).send('400 Error: You need both an email and a password to register.')
+     // if user didnt enter email or pw (email or pw are empty)
   }
 
-})
+});
 
 
 
