@@ -149,20 +149,24 @@ const findUserInDatabase = (email) => {
 app.post("/login", (req, res) => {
   const user = findUserInDatabase(req.body.email);
   if (user) {
-
+    // if user exists and password entered matches 
+    if (req.body.password === password) {
+      // set user_id cookie 
+      res.cookie('user_id', user[userID]);
+      // redirect to /urls
+      res.redirect('/urls');
+    } else {
+      res.statusCode(403).send('<h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>')
+    }
+  } else {
+    res.statusCode(403).send('<h1>403 Forbidden</h1><h4> The email address you have entered is not registered.</h4>')
   }
-
-
-  res.redirect("/urls");
 });
-
-
 
   // res only exists inside route authentication
   // res.json() - sends back a json response
   // when we send data as a form - it will be part of the request --> info will be in the body of the request
   // body is an object
-
 
 // LOGOUT ROUTE
 app.post("/logout", (req, res) => {
@@ -198,12 +202,12 @@ app.post('/register', (req, res) => {
       res.redirect('/urls');
       // if email already exists --> send err code (already registered)
    } else {
-      res.status(400).send('<h1>400 Error:</h1><h5> This email is already in use. Please try another email.</h5>')
+      res.status(400).send('<h1>400 Error:</h1><h4> This email is already in use. Please try another email.</h4>')
       // if email exists 
       // use header tags to add emphasis
    }
  } else {
-    res.status(400).send('<h1>400 Error:</h1> <h5>You need both an email and a password to register.</h5>')
+    res.status(400).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
      // if user didnt enter email or pw (email or pw are empty)
  }
 });
