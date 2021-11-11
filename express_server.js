@@ -84,7 +84,7 @@ app.get("/hello", (req, res) => {
 // NEW ROUTE - URLS_INDEX (shows all long and short urls w. option to edit or delete)
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  let templateVars = { urls: urlDatabase, user_id: req.cookies['user_id'] };
+  let templateVars = { urls: urlDatabase, user: users[req.cookies]['user_id'] };
   // res.render (template, object containing vars to pass into template)
   res.render("urls_index", templateVars);
 })
@@ -92,7 +92,7 @@ app.get("/urls", (req, res) => {
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
 // --------------------------------------------
 app.get("/urls/new", (req, res) => {
-  let templateVars = {user_id: req.cookies['user_id']}
+  let templateVars = {user: users[req.cookies]['user_id']}
   res.render("urls_new", templateVars);
 });
 
@@ -102,7 +102,7 @@ app.get("/urls/new", (req, res) => {
 // shortURL stored in req.params
 // /urls/:d route
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: req.cookies['user_id'] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies]['user_id'] };
   res.render("urls_show", templateVars);
 });
 
@@ -185,7 +185,7 @@ app.post("/logout", (req, res) => {
 // REGISTRATION ROUTE - /REGISTER (GET)
 // ------------------------------------
 app.get("/register", (req, res) => {
- let templateVars = { user_id: req.cookies['user_id'] }
+ let templateVars = { user: users[req.cookies]['user_id'] }
 
   res.render('urls_register', templateVars);
 });
