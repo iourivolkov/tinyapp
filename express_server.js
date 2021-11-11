@@ -156,10 +156,10 @@ app.post("/login", (req, res) => {
       // redirect to /urls
       res.redirect('/urls');
     } else {
-      res.statusCode(403).send('<h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>')
+      res.status(403).send('<h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>')
     }
   } else {
-    res.statusCode(403).send('<h1>403 Forbidden</h1><h4> The email address you have entered is not registered.</h4>')
+    res.status(403).send('<h1>403 Forbidden</h1><h4> The email address you have entered is not registered.</h4>')
   }
 });
 
@@ -202,12 +202,12 @@ app.post('/register', (req, res) => {
       res.redirect('/urls');
       // if email already exists --> send err code (already registered)
    } else {
-      res.status(400).send('<h1>400 Error:</h1><h4> This email is already in use. Please try another email.</h4>')
+      res.status(403).send('<h1>400 Error:</h1><h4> This email is already in use. Please try another email.</h4>')
       // if email exists 
       // use header tags to add emphasis
    }
  } else {
-    res.status(400).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
+    res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
      // if user didnt enter email or pw (email or pw are empty)
  }
 });
