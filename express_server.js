@@ -76,15 +76,13 @@ app.get("/hello", (req, res) => {
 // NEW ROUTE - URLS_INDEX (shows all long and short urls w. option to edit or delete)
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  let templateVars = { urls: urlDatabase, user: users[req.cookies]['user_id'] };
-  console.log(templateVars);
-  // cannot convert object --> primitive value! ***
+  let templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
   res.render("urls_index", templateVars);
 })
 
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies]['user_id'] }
+  let templateVars = { user: users[req.cookies['user_id']] }
   res.render("urls_new", templateVars);
 });
 
@@ -92,7 +90,7 @@ app.get("/urls/new", (req, res) => {
 // ":" indicates shortURL is a route parameter
 // shortURL stored in req.params
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies]['user_id'] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies['user_id']] };
   res.render("urls_show", templateVars);
 });
 
@@ -155,12 +153,14 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// REGISTRATION ROUTE - /REGISTER (GET)
+// REGISTRATION PAGE - /REGISTER (GET)
 app.get("/register", (req, res) => {
- let templateVars = { user: users[req.cookies]['user_id'] }
+ let templateVars = { user: users[req.cookies['user_id']] }
  // tempVars - object passsed into ejs for render
   res.render('urls_register', templateVars);
 });
+
+
 // check if given email is already in the usersObj
 const checkIfEmailExists = (email) => {
   for (const user in users) { 
@@ -171,7 +171,6 @@ const checkIfEmailExists = (email) => {
   return false;
 };
 
-
 // REGISTRATION HANDLER /REGISTER (POST)
 app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
@@ -179,8 +178,9 @@ app.post('/register', (req, res) => {
   // if email and password are truthy - are not empty strings
     if (!checkIfEmailExists) {
       // if email doesnt already exist
-      const newUser = {
-        id: generateRandomString(),
+      const userID = generateRandomString;
+      users[userID] = {
+        userID,
         email: req.body.email,
         password: req.body.password
         // new userid = random #, email comes from registration form, pw comes from registration form
@@ -189,14 +189,13 @@ app.post('/register', (req, res) => {
       res.redirect('/urls');
       // if email already exists --> send err code (already registered)
     } else {
-      res.status(400).send('400 Error: This email is already in use. Please try another email.')
+      res.status(400).send('<h1>400 Error:</h1><h5> This email is already in use. Please try another email.</h5>')
       // if email exists 
     }
   } else {
-    res.status(400).send('400 Error: You need both an email and a password to register.')
+    res.status(400).send('<h1>400 Error:</h1> <h5>You need both an email and a password to register.</h5>')
      // if user didnt enter email or pw (email or pw are empty)
   }
-
 });
 
 
