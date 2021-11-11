@@ -25,6 +25,25 @@ const generateRandomString = () => {
   }
   return output; 
 }
+
+// USERS OBJECT 
+// ------------
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
+// database[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
+// database[usersID].email = user@example.com 
+
 // DATABSE OBJECT
 // --------------
 const urlDatabase = {
@@ -32,8 +51,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-// TEST GET REQUEST
-// ----------------
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -57,12 +74,6 @@ app.get("/urls.json", (req, res) => {
 // const bodyParser = require("body-parser");
 app.use(express.urlencoded({extended: true}));
 // extended - allows us to input objects and arrays + primitives
-
-// COOKIE PARSER - MIDDLEWARE - HELPS READ COOKIE VALUES
-// -----------------------------------------------------
-
-// res.cookie(name, value [, options]) <-- implementation
-
 
 //ADD ROUTE - HTML settings  
 // ------------------------
@@ -88,7 +99,7 @@ app.get("/urls/new", (req, res) => {
 // SECOND ROUTE & EJS TEMPLATE - URLS_SHOW (show short/long urls)
 // ---------------------------
 // ":" indicates shortURL is a route parameter
-// shortURL stores in req.params 
+// shortURL stored in req.params 
 // /urls/:d route 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
@@ -133,18 +144,16 @@ app.post("/urls/:shortURL", (req, res) => {
 
 });
 
-// AUTHENTICATION ROUTE 
-// --------------------
 
 // LOGIN ROUTE 
 // -----------
-// set a cookie named username to the value submitted in the request body via login form
-// after server has set the cookie - redirect the browser back to /urls page
-
 app.post("/login", (req, res) => {
   // what do we want to do with our login route 
+  
+  // const result = authenticateUser(user, email, password); 
   //const username = req.body.username;
   // res.json({username}); // returns username
+ 
   res.cookie('username', req.body.username);
   // redirects to /urls after login
   res.redirect("/urls"); 
@@ -156,8 +165,12 @@ app.post("/login", (req, res) => {
   // body is an object 
   
   //res.cookie('username', username) 
+  if (result.err) {
+    console.log(result.err);
+    return res.redirect('/');
+  }
+  return res.json(result.data);
 });
-
 
 // LOGOUT ROUTE 
 // ------------
@@ -172,12 +185,38 @@ app.post("/logout", (req, res) => {
 // REGISTRATION ROUTE - /REGISTER (GET)
 // ------------------------------------
 app.get("/register", (req, res) => {
- let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
+ let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] }
 
   res.render('urls_register', templateVars);
+});
+
+// REGISTRATION AUTHENTICATOR 
+// --------------------------
 
 
-})
+// REGISTRATION HANDLER /REGISTER (POST)
+// -------------------------------------
+app.post("/register", (req, res) => {
+    let email = req.body.email;
+    let password = req.body.password;
+    let uniqueID = generateRandomString();
+
+    res.cookie("username", uniqueID);
+
+    let templateVars = {
+      username: uniqueID
+    };
+
+    users[uniqueID] = { id: uniqueID, email: email, password: password };
+    
+  res.redirect('/urls');
+  }
+ 
+);
+
+ 
+
+
 
 
 
