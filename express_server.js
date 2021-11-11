@@ -207,6 +207,13 @@ app.post('/register', (req, res) => {
 // registration showing errors only - even if register with unique credentials --> error
 // cookies not registering 
 
+// LOGIN FORM (GET) /LOGIN PAGE 
+app.get('/login', (req, res) => {
+  let templateVars = { user: users[req.cookies['user_id']] }
+  res.render('urls_login', templateVars);
+});
+
+
 
 
 
