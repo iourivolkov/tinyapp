@@ -1,39 +1,42 @@
 // dependencies
 const express = require("express");
 const app = express();
+// used to hash passwords
 const bcrypt = require('bcryptjs');
+// default port = 8080
 const PORT = 8080;
 
 // middle ware
+// logs requests b.w client and server
 const morgan = require("morgan");
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: true}));
-
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 app.use(cookieParser());
 
-// template engine 
+// sets template engine to ejs
 app.set("view engine", "ejs");
 
+app.listen(PORT, () => {
+  console.log(`TinyApp listening on port ${PORT}!`);
+});
 
-// users object w. hashed pw
+// users object
 const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
+    password: "purple-monkey-dinosaur"
   },
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: bcrypt.hashSync("dishwasher-funk", 10)
+    password: "dishwasher-funk"
   }
 };
 
-// const urlDatabase = {};
-// const users = {};
-
-// url database v2
+// url database object v2
 const urlDatabase = {
   b6UTxQ: {
       longURL: "https://www.tsn.ca",
@@ -45,22 +48,17 @@ const urlDatabase = {
   }
 };
 
-// longURL = urlDatabase[shortURL].longURL;
 // helper f(x)'s
 
 // check if user exists in database
-const findUserInDatabase = (email, database) => {
+const findUsersEmail = (email, database) => {
   for (const user in database) { 
-    // user = key
     if (database[user].email === email) {
-      // if users[key].email === email 
       return database[user];
   }
 }
   return null;
-  // undefined can be natural - null is deliberate
 };
-
 
 // generates string of 6 random characters - used to create unique userID
 const generateRandomString = () => {
@@ -75,49 +73,23 @@ const generateRandomString = () => {
   return output;
 }
 
-// const users = {
-  // "userRandomID": {
-  //   id: "userRandomID",
-  //   email: "user@example.com",
-  //   password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
-
-  // const urlDatabase = {
-  //   b6UTxQ: {
-  //       longURL: "https://www.tsn.ca",
-  //       userID: "aJ48lW"
-
-const urlsForSpecificUser = (id) => {
+const urlPerUser = (id) => {
   // initialize empty object
-  let userURLS = {};
+  let userUrls = {};
   // iterate over urlDatabase keys (shortURL)
   for (const shortURL in urlDatabase) {
     // if userid in urlDatabase matches the users id 
-    // then the given shortURL belongs to that user
+    // then add that shortURL to the userURLS obj
     if (urlDatabase[shortURL].userID === id) {
-      userURLS[shortURL] = urlDatabase[shortURL];
+      userUrls[shortURL] = urlDatabase[shortURL];
     }
   }
   // return new obj containing all shortURLs for specific user
-  return userURLS;
+  return userUrls;
 }
-
-
-// users[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
-// users[usersID].email = user@example.com
-
-// DATABASE OBJECT
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
+// practice req. --> disp. "hello"
 app.get("/", (req, res) => {
   res.send("Hello!");
-});
-
-// set up server
-app.listen(PORT, () => {
-  console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 // route (GET) to join database
@@ -125,48 +97,23 @@ app.get("/urls.json", (req, res) => {
   res.json(users);
 });
 
+// request in html format 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-
 // urls_index (GET) - shows all long & short urls w. option to edit or delete 
 app.get("/urls", (req, res) => {
-  // template vars = object that gets passed to ejs for rendering
   const userID = req.cookies['user_id'];
-  const userurl = urlsForSpecificUser(userID);
-  let templateVars = { urls: userurl, user: users[userID] };
+  const userUrls = urlPerUser(userID);
+  let templateVars = { urls: userUrls, user: users[userID] };
+  // template vars = object that gets passed to ejs for rendering
   res.render("urls_index", templateVars);
 })
 
-
-// urls_new (GET) - create new url
-app.get("/urls/new", (req, res) => {
-// if cookie for user_id exists --> render urls_new template
-  if (req.cookies['user_id']) {
-    let templateVars = { user: users[req.cookies['user_id']] }
-    res.render("urls_new", templateVars);
-  } else {
-    // otherwise, redirect to login page 
-    res.redirect('/login');
-  }
-});
-
-
-// urls_show (GET) - shows short & long urls
-// ":" indicates shortURL is a route parameter
-// shortURL stored in req.params
-app.get("/urls/:shortURL", (req, res) => {
-  const userID = req.cookies['user_id'];
-  const usersurls = urlsForSpecificUser(userID);
-  let templateVars = { urls: usersurls, user: users[userID], shortURL: req.params.shortURL };
-  res.render("urls_show", templateVars);
-});
-
-
 // /urls (POST) - handles form submission 
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
+  const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.cookies['user_id']
@@ -176,43 +123,61 @@ app.post("/urls", (req, res) => {
 });
 
 
-// /u/:shortURL (GET) - redirects to long url
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (longURL) {
-    res.redirect(`http:${longURL}`);
+// urls_new (GET) - create new url
+app.get("/urls/new", (req, res) => {
+// if cookie for user_id exists --> render urls_new template
+  if (req.cookies['user_id']) {
+    let templateVars = { user: users[req.cookies['user_id']] }
+    res.render("urls_new", templateVars);
+
   } else {
-    res.status(404).send('<h1>404 Not Found</h1><h4>The shortURL you have entered does not exist</h4>')
+    // otherwise, redirect to login page 
+    res.redirect('/login');
   }
-  // longURL = value belonging to the short URL key in URL database
-  // add http to prevent infinite loop error / relative path error
+});
+
+// urls_show (GET) - shows short & long urls
+// ":" indicates shortURL is a route parameter
+// shortURL stored in req.params
+app.get("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies['user_id'];
+  const userUrls = urlPerUser(userID);
+  let templateVars = { urls: userUrls, user: users[userID], shortURL: req.params.shortURL };
+  res.render("urls_show", templateVars);
 });
 
 
-// (POST) - route to delete a resource
-app.post("/urls/:shortURL/delete", (req, res) => {
-  // use js delete operator to remove property from an object
-  delete urlDatabase[req.params.shortURL];
-
-  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
-    delete urlDatabase[shortURL];
-  }
-  // redirects to home page (/urls) once resource is removed
-  res.redirect('/urls');
-
-});
-
-
-// (POST) - route to update a resource
+// (POST) - route to update a resource in database
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.updatedURL;
   }
-
   res.redirect(`/urls/${shortURL}`);
 });
 
+// (POST) - route to delete a resource
+app.post("/urls/:shortURL/delete", (req, res) => {
+  // use js delete operator to remove property from an object
+  const shortURL = req.params.shortURL;
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+  }
+  // redirects to home page (/urls) once resource is removed
+  res.redirect('/urls');
+});
+
+// /u/:shortURL (GET) - redirects to long url
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  if (longURL) {
+    res.redirect(`http:${longURL}`);
+    // add http to prevent relative path error
+  } else {
+    res.status(404).send('<h1>404 Not Found</h1><h4>The shortURL you have entered does not exist</h4>')
+  }
+  // longURL = value belonging to the short URL key in URL database
+});
 
 // login route 
 // check if user can be found in userdatabase
@@ -220,23 +185,19 @@ app.post("/urls/:shortURL", (req, res) => {
 // set up cookies 
 // set up encrypted cookies - cookies sessions 
 
-
 // urls_login (GET) 
 app.get("/login", (req, res) => {
   let templateVars = { user: users[req.cookies['user_id']]};
   res.render("urls_login", templateVars);
 });
 
-
 // /login (POST) - authenticates user and logs them in 
 app.post('/login', (req, res) => {
-  const user = findUserInDatabase(req.body.email, users);
+  const user = findUsersEmail(req.body.email, users);
   // if user exists
-  const hashedpassword = bcrypt.hashSync(req.body.password, 10);
-  if (user) { // req.body.password === user.password
+  if (user) { 
     // check if users's pw is correct using compareSync
-    // hashses entered pw and compares against hash 
-    if (bcrypt.compareSync(req.body.password, hashedpassword)) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
       res.cookie('user_id', user.userID);
       res.redirect('/urls');
     } else {
@@ -275,11 +236,12 @@ app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
  if (req.body.email && req.body.password) {
   // if email and password are truthy - are not empty strings
-   if (!findUserInDatabase(req.body.email, users)) {
+   if (!findUsersEmail(req.body.email, users)) {
       // if email doesnt already exist
-       // has password with bcrypt
-      const hashedpassword = bcrypt.hashSync(req.body.password, 10);
+       // generate unique user id, hash password and add user to users object 
       const userID = generateRandomString();
+      const hashedpassword = bcrypt.hashSync(req.body.password, 10);
+      
       users[userID] = {
         userID,
         email: req.body.email,
@@ -290,19 +252,19 @@ app.post('/register', (req, res) => {
       res.redirect('/urls');
       // if email already exists --> send err code (already registered)
    } else {
-      res.status(403).send('<h1>400 Bad Request:<br></h1> This email is already in use. Please try another email.')
+      res.status(400).send('<h1>400 Bad Request:<br></h1> This email is already in use. Please try another email.')
       // if email exists 
       // use header tags to add emphasis
    }
  } else {
-    res.status(403).send('<h1>400 Bad Request:<br></h1>You need both an email and a password to register.')
+    res.status(400).send('<h1>400 Bad Request:<br></h1>You need both an email and a password to register.')
      // if user didnt enter email or pw (email or pw are empty)
  }
 });
 
 
-// logout button not appearing
-// registration showing errors only - even if register with unique credentials --> error
+
+
 
 
 
