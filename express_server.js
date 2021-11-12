@@ -83,8 +83,14 @@ app.get("/urls", (req, res) => {
 
 // GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies['user_id']] }
+// if cookie for user_id exists --> render urls_new template
+  if (req.cookies['user_id']) {
+    let templateVars = { user: users[req.cookies['user_id']] }
   res.render("urls_new", templateVars);
+  } else {
+    // otherwise, redirect to login page 
+    res.redirect('/login');
+  }
 });
 
 // SECOND ROUTE & EJS TEMPLATE - URLS_SHOW (show short/long urls)
@@ -178,7 +184,7 @@ app.post("/login", (req, res) => {
       // set cookie for user and redirect to /urls page
       res.redirect('/urls');
     } else {
-      res.status(403).send('h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>');
+      res.status(403).send('<h1>403 Forbidden</h1><h4> Uh oh.. The password you have entered is incorrect.</h4>');
   } 
   } else {
     res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
