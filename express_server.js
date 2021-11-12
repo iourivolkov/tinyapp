@@ -232,8 +232,11 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   const user = findUserInDatabase(req.body.email, users);
   // if user exists
-  if (user) { 
-    if (req.body.password === user.password) {
+  const hashedpassword = bcrypt.hashSync(req.body.password, 10);
+  if (user) { // req.body.password === user.password
+    // check if users's pw is correct using compareSync
+    // hashses entered pw and compares against hash 
+    if (bcrypt.compareSync(req.body.password, hashedpassword)) {
       res.cookie('user_id', user.userID);
       res.redirect('/urls');
     } else {
@@ -274,11 +277,13 @@ app.post('/register', (req, res) => {
   // if email and password are truthy - are not empty strings
    if (!findUserInDatabase(req.body.email, users)) {
       // if email doesnt already exist
+       // has password with bcrypt
+      const hashedpassword = bcrypt.hashSync(req.body.password, 10);
       const userID = generateRandomString();
       users[userID] = {
         userID,
         email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10)
+        password: hashedpassword
         // new userid = random #, email comes from registration form, pw comes from registration form
       }
       res.cookie('user_id', userID);
