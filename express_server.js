@@ -4,6 +4,7 @@ const morgan = require("morgan");
 app.use(morgan('dev'));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+const bcrypt = require('bcryptjs');
 
 const PORT = 8080;
 
@@ -37,6 +38,8 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+// passwords stored in plain text
+
 
 
 // users[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
