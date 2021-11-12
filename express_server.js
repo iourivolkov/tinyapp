@@ -116,13 +116,13 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // POST ROUTE TO HANDLE FORM SUBMISSION
 app.post("/urls", (req, res) => {
-  let uniqueShortURL = generateRandomString();
-  urlDatabase[uniqueShortURL] = {
+  let shortURL = generateRandomString();
+  urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.cookies['user_id']
   };
  // redirect client to new page - page link = randomly generated string
-  res.redirect(`/urls/${uniqueShortURL}`);
+  res.redirect(`/urls/${shortURL}`);
 });
 
 // REDIRECTs USER TO LONG URL
@@ -131,7 +131,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (longURL) {
     res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
-    res.status(400).send('<h1>404 Not Found</h1><h4>The shortURL you have entered does not exist</h4>')
+    res.status(404).send('<h1>404 Not Found</h1><h4>The shortURL you have entered does not exist</h4>')
   }
   // longURL = value belonging to the short URL key in URL database
   // add http to prevent infinite loop error / relative path error
@@ -148,21 +148,24 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // POST ROUTE TO UPDATE A RESOURCE
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[shortURL].longURL = req.body.newlongURL;
+  const shortURL = req.params.shortURL;
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    urlDatabase[shortURL].longURL = req.body.updatedURL;
+  }
 
-  res.redirect(`/urls${shortURL}`);
+  res.redirect(`/urls/${shortURL}`);
 });
 
 
 // check if given email is already in the usersObj
-const findUserInDatabase = (email) => {
-  for (const user in users) { 
+const findUserInDatabase = (email, database) => {
+  for (const user in database) { 
     // user = key
-    if (users[user].email === email) {
-    return true;
+    if (database[user].email === email) {
+      return database[user];
   }
 }
-  return false;
+  return undefined;
 };
 
 
@@ -194,22 +197,37 @@ app.get("/login", (req, res) => {
 //   }
 // });
 
-app.post("/login", (req, res) => {
-  const userID = generateRandomString();
-  if (req.body.email && req.body.password) {
-    // if email and password fields are filled in
-    if (findUserInDatabase(req.body.email)) {
-      // if user if found in the database
-      res.cookie('user_id', userID);
-      // set cookie for user and redirect to /urls page
+// app.post("/login", (req, res) => {
+//   const userID = generateRandomString();
+//   if (req.body.email && req.body.password) {
+//     // if email and password fields are filled in
+//     if (findUserInDatabase(req.body.email)) {
+//       // if user if found in the database
+//       res.cookie('user_id', userID);
+//       // set cookie for user and redirect to /urls page
+//       res.redirect('/urls');
+//     } else {
+//       res.status(403).send('<h1>403 Forbidden</h1><h4> Uh oh.. The password you have entered is incorrect.</h4>');
+//   } 
+//   } else {
+//     res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
+//   }
+// })
+
+app.post('/login', (req, res) => {
+  const user = findUserInDatabase(req.body.email, users);
+  // if user exists
+  if (user) { 
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.userID);
       res.redirect('/urls');
     } else {
       res.status(403).send('<h1>403 Forbidden</h1><h4> Uh oh.. The password you have entered is incorrect.</h4>');
-  } 
+    }
   } else {
-    res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
+    res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>');
   }
-})
+});
 
   // res only exists inside route authentication
   // res.json() - sends back a json response
@@ -237,7 +255,7 @@ app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
  if (req.body.email && req.body.password) {
   // if email and password are truthy - are not empty strings
-   if (!findUserInDatabase(req.body.email)) {
+   if (!findUserInDatabase(req.body.email, users)) {
       // if email doesnt already exist
       const userID = generateRandomString();
       users[userID] = {
