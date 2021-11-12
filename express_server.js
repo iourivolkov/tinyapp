@@ -1,18 +1,68 @@
+// dependencies
 const express = require("express");
 const app = express();
-const morgan = require("morgan");
-app.use(morgan('dev'));
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
 const bcrypt = require('bcryptjs');
-
 const PORT = 8080;
 
-// SETS EJS AS VIEW ENGINE
+// middle ware
+const morgan = require("morgan");
+app.use(morgan('dev'));
+app.use(express.urlencoded({extended: true}));
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
+// template engine 
 app.set("view engine", "ejs");
 
 
-// GENERATES RANDOMIZED 6 CHAR STRING
+// users object w. hashed pw
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: bcrypt.hashSync("dishwasher-funk", 10)
+  }
+};
+
+// const urlDatabase = {};
+// const users = {};
+
+// url database v2
+const urlDatabase = {
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
+};
+
+// longURL = urlDatabase[shortURL].longURL;
+// helper f(x)'s
+
+// check if user exists in database
+const findUserInDatabase = (email, database) => {
+  for (const user in database) { 
+    // user = key
+    if (database[user].email === email) {
+      // if users[key].email === email 
+      return database[user];
+  }
+}
+  return null;
+  // undefined can be natural - null is deliberate
+};
+
+
+// generates string of 6 random characters - used to create unique userID
 const generateRandomString = () => {
   let output = ' ';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789';
@@ -25,21 +75,31 @@ const generateRandomString = () => {
   return output;
 }
 
-// USERS OBJECT
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
-// passwords stored in plain text
+// const users = {
+  // "userRandomID": {
+  //   id: "userRandomID",
+  //   email: "user@example.com",
+  //   password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
 
+  // const urlDatabase = {
+  //   b6UTxQ: {
+  //       longURL: "https://www.tsn.ca",
+  //       userID: "aJ48lW"
+
+const urlsForSpecificUser = (id) => {
+  // initialize empty object
+  let userURLS = {};
+  // iterate over urlDatabase keys (shortURL)
+  for (const shortURL in urlDatabase) {
+    // if userid in urlDatabase matches the users id 
+    // then the given shortURL belongs to that user
+    if (urlDatabase[shortURL].userID === id) {
+      userURLS[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  // return new obj containing all shortURLs for specific user
+  return userURLS;
+}
 
 
 // users[userID] = {id: "userRandomID", email: "user@example.com", password: "purple-monkey-dinosaur"}
@@ -55,69 +115,56 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-const urlDatabase = {
-  b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
-  },
-  i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "aJ48lW"
-  }
-};
-
-
-
-//SERVER SETUP
+// set up server
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}!`);
 });
 
-// ROUTE TO JOIN URL DATABASE
+// route (GET) to join database
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(users);
 });
 
-// MAKES POST REQUEST READABLE
-// converts request body from a Buffer into a readable string
-// adds the data to the req object under the key - body
-// const bodyParser = require("body-parser");
-app.use(express.urlencoded({extended: true}));
-// extended - allows us to input objects and arrays + primitives
-
-//ADD ROUTE - HTML settings
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// NEW ROUTE - URLS_INDEX (shows all long and short urls w. option to edit or delete)
+
+// urls_index (GET) - shows all long & short urls w. option to edit or delete 
 app.get("/urls", (req, res) => {
   // template vars = object that gets passed to ejs for rendering
-  let templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
+  const userID = req.cookies['user_id'];
+  const userurl = urlsForSpecificUser(userID);
+  let templateVars = { urls: userurl, user: users[userID] };
   res.render("urls_index", templateVars);
 })
 
-// GET ROUTE TO SHOW FORM / RENDER URL TEMPLATE  - URLS_NEW (create new url)
+
+// urls_new (GET) - create new url
 app.get("/urls/new", (req, res) => {
 // if cookie for user_id exists --> render urls_new template
   if (req.cookies['user_id']) {
     let templateVars = { user: users[req.cookies['user_id']] }
-  res.render("urls_new", templateVars);
+    res.render("urls_new", templateVars);
   } else {
     // otherwise, redirect to login page 
     res.redirect('/login');
   }
 });
 
-// SECOND ROUTE & EJS TEMPLATE - URLS_SHOW (show short/long urls)
+
+// urls_show (GET) - shows short & long urls
 // ":" indicates shortURL is a route parameter
 // shortURL stored in req.params
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies['user_id']] };
+  const userID = req.cookies['user_id'];
+  const usersurls = urlsForSpecificUser(userID);
+  let templateVars = { urls: usersurls, user: users[userID], shortURL: req.params.shortURL };
   res.render("urls_show", templateVars);
 });
 
-// POST ROUTE TO HANDLE FORM SUBMISSION
+
+// /urls (POST) - handles form submission 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
@@ -128,11 +175,12 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// REDIRECTs USER TO LONG URL
+
+// /u/:shortURL (GET) - redirects to long url
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (longURL) {
-    res.redirect(urlDatabase[req.params.shortURL].longURL);
+    res.redirect(`http:${longURL}`);
   } else {
     res.status(404).send('<h1>404 Not Found</h1><h4>The shortURL you have entered does not exist</h4>')
   }
@@ -140,16 +188,22 @@ app.get("/u/:shortURL", (req, res) => {
   // add http to prevent infinite loop error / relative path error
 });
 
-// POST ROUTE TO DELETE A RESOURCE
+
+// (POST) - route to delete a resource
 app.post("/urls/:shortURL/delete", (req, res) => {
   // use js delete operator to remove property from an object
   delete urlDatabase[req.params.shortURL];
+
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+  }
   // redirects to home page (/urls) once resource is removed
   res.redirect('/urls');
 
 });
 
-// POST ROUTE TO UPDATE A RESOURCE
+
+// (POST) - route to update a resource
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
@@ -160,63 +214,21 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 
-// check if given email is already in the usersObj
-const findUserInDatabase = (email, database) => {
-  for (const user in database) { 
-    // user = key
-    if (database[user].email === email) {
-      return database[user];
-  }
-}
-  return undefined;
-};
-
-
-// LOGIN ROUTE
+// login route 
 // check if user can be found in userdatabase
 // if user found in user database => login 
 // set up cookies 
 // set up encrypted cookies - cookies sessions 
 
+
+// urls_login (GET) 
 app.get("/login", (req, res) => {
   let templateVars = { user: users[req.cookies['user_id']]};
   res.render("urls_login", templateVars);
 });
 
-// app.post("/login", (req, res) => {
-//   const user = findUserInDatabase(req.body.email); //users
-//   if (user) {
-//     // if user exists and password entered matches 
-//     if (req.body.password === user.password) {
-//       // set user_id cookie 
-//       res.cookie('user_id', user.userID);
-//       // redirect to /urls
-//       res.redirect('/urls');
-//     } else {
-//       res.status(403).send('<h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>')
-//     }
-//   } else {
-//     res.status(403).send('<h1>403 Forbidden</h1><h4> The email address you have entered is not registered.</h4>')
-//   }
-// });
 
-// app.post("/login", (req, res) => {
-//   const userID = generateRandomString();
-//   if (req.body.email && req.body.password) {
-//     // if email and password fields are filled in
-//     if (findUserInDatabase(req.body.email)) {
-//       // if user if found in the database
-//       res.cookie('user_id', userID);
-//       // set cookie for user and redirect to /urls page
-//       res.redirect('/urls');
-//     } else {
-//       res.status(403).send('<h1>403 Forbidden</h1><h4> Uh oh.. The password you have entered is incorrect.</h4>');
-//   } 
-//   } else {
-//     res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
-//   }
-// })
-
+// /login (POST) - authenticates user and logs them in 
 app.post('/login', (req, res) => {
   const user = findUserInDatabase(req.body.email, users);
   // if user exists
@@ -225,10 +237,10 @@ app.post('/login', (req, res) => {
       res.cookie('user_id', user.userID);
       res.redirect('/urls');
     } else {
-      res.status(403).send('<h1>403 Forbidden</h1><h4> Uh oh.. The password you have entered is incorrect.</h4>');
+      res.status(403).send('<h1>403 Forbidden:<br></h1>Uh oh.. The password you have entered is incorrect.');
     }
   } else {
-    res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>');
+    res.status(403).send('<h1>403 Forbidden:<br></h1>You need both an email and a password to register.');
   }
 });
 
@@ -237,7 +249,8 @@ app.post('/login', (req, res) => {
   // when we send data as a form - it will be part of the request --> info will be in the body of the request
   // body is an object
 
-// LOGOUT ROUTE
+
+// /logout (POST) - logs user out -> redirects to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
   // clears cookies associated w. user_id 
@@ -245,7 +258,8 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// REGISTRATION PAGE - /REGISTER (GET)
+
+// /register (GET) - registers user 
 app.get("/register", (req, res) => {
  let templateVars = { user: users[req.cookies['user_id']] }
  // tempVars - object passsed into ejs for render
@@ -253,7 +267,7 @@ app.get("/register", (req, res) => {
 });
 
 
-// REGISTRATION HANDLER /REGISTER (POST)
+// /register (POST) - handles user registration 
 app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
  if (req.body.email && req.body.password) {
@@ -264,32 +278,27 @@ app.post('/register', (req, res) => {
       users[userID] = {
         userID,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body.password, 10)
         // new userid = random #, email comes from registration form, pw comes from registration form
       }
       res.cookie('user_id', userID);
       res.redirect('/urls');
       // if email already exists --> send err code (already registered)
    } else {
-      res.status(403).send('<h1>400 Error:</h1><h4> This email is already in use. Please try another email.</h4>')
+      res.status(403).send('<h1>400 Bad Request:<br></h1> This email is already in use. Please try another email.')
       // if email exists 
       // use header tags to add emphasis
    }
  } else {
-    res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
+    res.status(403).send('<h1>400 Bad Request:<br></h1>You need both an email and a password to register.')
      // if user didnt enter email or pw (email or pw are empty)
  }
 });
 
+
 // logout button not appearing
 // registration showing errors only - even if register with unique credentials --> error
-// cookies not registering 
 
-// LOGIN FORM (GET) /LOGIN PAGE 
-app.get('/login', (req, res) => {
-  let templateVars = { user: users[req.cookies['user_id']] }
-  res.render('urls_login', templateVars);
-});
 
 
 
