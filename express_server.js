@@ -43,14 +43,27 @@ const users = {
 // users[usersID].email = user@example.com
 
 // DATABASE OBJECT
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
+const urlDatabase = {
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
+};
+
+
 
 //SERVER SETUP
 app.listen(PORT, () => {
@@ -97,22 +110,29 @@ app.get("/urls/new", (req, res) => {
 // ":" indicates shortURL is a route parameter
 // shortURL stored in req.params
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies['user_id']] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies['user_id']] };
   res.render("urls_show", templateVars);
 });
 
 // POST ROUTE TO HANDLE FORM SUBMISSION
 app.post("/urls", (req, res) => {
   let uniqueShortURL = generateRandomString();
-  urlDatabase[uniqueShortURL] = req.body.longURL;
+  urlDatabase[uniqueShortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies['user_id']
+  };
  // redirect client to new page - page link = randomly generated string
   res.redirect(`/urls/${uniqueShortURL}`);
 });
 
-// REDIRECT USER TO LONG URL
+// REDIRECTs USER TO LONG URL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(`http://${longURL}`);
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  if (longURL) {
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
+  } else {
+    res.status(400).send('<h1>404 Not Found</h1><h4>The shortURL you have entered does not exist</h4>')
+  }
   // longURL = value belonging to the short URL key in URL database
   // add http to prevent infinite loop error / relative path error
 });
@@ -128,9 +148,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // POST ROUTE TO UPDATE A RESOURCE
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
+  urlDatabase[shortURL].longURL = req.body.newlongURL;
 
-  res.redirect("/urls");
+  res.redirect(`/urls${shortURL}`);
 });
 
 
