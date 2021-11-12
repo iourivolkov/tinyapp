@@ -141,28 +141,49 @@ const findUserInDatabase = (email) => {
 
 
 // LOGIN ROUTE
-// redo login route 
 // check if user can be found in userdatabase
 // if user found in user database => login 
 // set up cookies 
 // set up encrypted cookies - cookies sessions 
 
+app.get("/login", (req, res) => {
+  let templateVars = { user: users[req.cookies['user_id']]};
+  res.render("urls_login", templateVars);
+});
+
+// app.post("/login", (req, res) => {
+//   const user = findUserInDatabase(req.body.email); //users
+//   if (user) {
+//     // if user exists and password entered matches 
+//     if (req.body.password === user.password) {
+//       // set user_id cookie 
+//       res.cookie('user_id', user.userID);
+//       // redirect to /urls
+//       res.redirect('/urls');
+//     } else {
+//       res.status(403).send('<h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>')
+//     }
+//   } else {
+//     res.status(403).send('<h1>403 Forbidden</h1><h4> The email address you have entered is not registered.</h4>')
+//   }
+// });
+
 app.post("/login", (req, res) => {
-  const user = findUserInDatabase(req.body.email, users);
-  if (user) {
-    // if user exists and password entered matches 
-    if (req.body.password === user.password) {
-      // set user_id cookie 
-      res.cookie('user_id', user.userID);
-      // redirect to /urls
+  const userID = generateRandomString();
+  if (req.body.email && req.body.password) {
+    // if email and password fields are filled in
+    if (findUserInDatabase(req.body.email)) {
+      // if user if found in the database
+      res.cookie('user_id', userID);
+      // set cookie for user and redirect to /urls page
       res.redirect('/urls');
     } else {
-      res.status(403).send('<h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>')
-    }
+      res.status(403).send('h1>403 Forbidden</h1><h4> The password you have entered is incorrect.</h4>');
+  } 
   } else {
-    res.status(403).send('<h1>403 Forbidden</h1><h4> The email address you have entered is not registered.</h4>')
+    res.status(403).send('<h1>400 Error:</h1> <h4>You need both an email and a password to register.</h4>')
   }
-});
+})
 
   // res only exists inside route authentication
   // res.json() - sends back a json response
