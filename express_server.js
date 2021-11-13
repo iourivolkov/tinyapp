@@ -11,9 +11,16 @@ const PORT = 8080;
 const morgan = require("morgan");
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: true}));
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2'],
+
+// age = 24 hours 
+  maxAge: 24 * 60 * 60 * 1000 
+}))
 
 // sets template engine to ejs
 app.set("view engine", "ejs");
@@ -104,7 +111,7 @@ app.get("/hello", (req, res) => {
 
 // urls_index (GET) - shows all long & short urls w. option to edit or delete 
 app.get("/urls", (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const userUrls = urlPerUser(userID);
   let templateVars = { urls: userUrls, user: users[userID] };
   // template vars = object that gets passed to ejs for rendering
@@ -116,7 +123,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies['user_id']
+    userID: req.session.user_id
   };
  // redirect client to new page - page link = randomly generated string
   res.redirect(`/urls/${shortURL}`);
@@ -126,8 +133,8 @@ app.post("/urls", (req, res) => {
 // urls_new (GET) - create new url
 app.get("/urls/new", (req, res) => {
 // if cookie for user_id exists --> render urls_new template
-  if (req.cookies['user_id']) {
-    let templateVars = { user: users[req.cookies['user_id']] }
+  if (req.session.user_id) {
+    let templateVars = { user: users[req.session.user_id] }
     res.render("urls_new", templateVars);
 
   } else {
@@ -140,7 +147,7 @@ app.get("/urls/new", (req, res) => {
 // ":" indicates shortURL is a route parameter
 // shortURL stored in req.params
 app.get("/urls/:shortURL", (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const userUrls = urlPerUser(userID);
   let templateVars = { urls: userUrls, user: users[userID], shortURL: req.params.shortURL };
   res.render("urls_show", templateVars);
@@ -150,7 +157,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // (POST) - route to update a resource in database
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+  if (req.session.user_id === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.updatedURL;
   }
   res.redirect(`/urls/${shortURL}`);
@@ -160,7 +167,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   // use js delete operator to remove property from an object
   const shortURL = req.params.shortURL;
-  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+  if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
   }
   // redirects to home page (/urls) once resource is removed
@@ -187,7 +194,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // urls_login (GET) 
 app.get("/login", (req, res) => {
-  let templateVars = { user: users[req.cookies['user_id']]};
+  let templateVars = { user: users[req.session.user_id]};
   res.render("urls_login", templateVars);
 });
 
@@ -225,7 +232,7 @@ app.post("/logout", (req, res) => {
 
 // /register (GET) - registers user 
 app.get("/register", (req, res) => {
- let templateVars = { user: users[req.cookies['user_id']] }
+ let templateVars = { user: users[req.session.user_id] }
  // tempVars - object passsed into ejs for render
   res.render('urls_register', templateVars);
 });
