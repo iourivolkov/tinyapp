@@ -1,4 +1,8 @@
 // dependencies
+
+const { getUserByEmail, generateRandomString, urlPerUser } = require('./helpers');
+
+
 const express = require("express");
 const app = express();
 // used to hash passwords
@@ -55,45 +59,6 @@ const urlDatabase = {
   }
 };
 
-// helper f(x)'s
-
-// check if user exists in database
-const findUsersEmail = (email, database) => {
-  for (const user in database) { 
-    if (database[user].email === email) {
-      return database[user];
-  }
-}
-  return null;
-};
-
-// generates string of 6 random characters - used to create unique userID
-const generateRandomString = () => {
-  let output = ' ';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz0123456789';
-  const charLength = characters.length;
-  const maxRandomStringLength = 6;
-
-  for(let i = 0; i < maxRandomStringLength; i++) {
-    output += characters.charAt(Math.floor(Math.random() * charLength));
-  }
-  return output;
-}
-
-const urlPerUser = (id) => {
-  // initialize empty object
-  let userUrls = {};
-  // iterate over urlDatabase keys (shortURL)
-  for (const shortURL in urlDatabase) {
-    // if userid in urlDatabase matches the users id 
-    // then add that shortURL to the userURLS obj
-    if (urlDatabase[shortURL].userID === id) {
-      userUrls[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  // return new obj containing all shortURLs for specific user
-  return userUrls;
-}
 // practice req. --> disp. "hello"
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -129,7 +94,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-
 // urls_new (GET) - create new url
 app.get("/urls/new", (req, res) => {
 // if cookie for user_id exists --> render urls_new template
@@ -152,7 +116,6 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { urls: userUrls, user: users[userID], shortURL: req.params.shortURL };
   res.render("urls_show", templateVars);
 });
-
 
 // (POST) - route to update a resource in database
 app.post("/urls/:shortURL", (req, res) => {
@@ -200,7 +163,7 @@ app.get("/login", (req, res) => {
 
 // /login (POST) - authenticates user and logs them in 
 app.post('/login', (req, res) => {
-  const user = findUsersEmail(req.body.email, users);
+  const user = getUserByEmail(req.body.email, users);
   // if user exists
   if (user) { 
     // check if users's pw is correct using compareSync
@@ -220,7 +183,6 @@ app.post('/login', (req, res) => {
   // when we send data as a form - it will be part of the request --> info will be in the body of the request
   // body is an object
 
-
 // /logout (POST) - logs user out -> redirects to /urls
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
@@ -229,7 +191,6 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-
 // /register (GET) - registers user 
 app.get("/register", (req, res) => {
  let templateVars = { user: users[req.session.user_id] }
@@ -237,13 +198,12 @@ app.get("/register", (req, res) => {
   res.render('urls_register', templateVars);
 });
 
-
 // /register (POST) - handles user registration 
 app.post('/register', (req, res) => {
   // if email and pass word return truthy & are not found in existing db --> add new user to db
  if (req.body.email && req.body.password) {
   // if email and password are truthy - are not empty strings
-   if (!findUsersEmail(req.body.email, users)) {
+   if (!getUserByEmail(req.body.email, users)) {
       // if email doesnt already exist
        // generate unique user id, hash password and add user to users object 
       const userID = generateRandomString();
