@@ -12,7 +12,7 @@
 <body>
   <%- include('partials/_header'); %> 
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
+    <% if (user) { %>
     <table class="table">
       <thead>
         <tr>
@@ -29,7 +29,7 @@
             <td><%= urls[url].longURL %></td>
             <td>
               <form method="POST" action="/urls/<%= url %>">
-               <a class="btn btn-outline-primary" href="/urls/<%= url %>">Edit</button>
+               <a class="btn btn-outline-primary" href="/urls/<%= url %>">Edit</a>
               </form>
            </td>
            <td>
@@ -41,6 +41,14 @@
         <% } %>
       </tbody>
     </table>
+    <% } else { %>
+      <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+          <h1 class="display-4">You must be logged in</h1>
+          <p class="lead">to see your URLs.</p>
+        </div>
+      </div>
+      <% } %>
   </main>
   
   <!-- Bootstrap JS -->
