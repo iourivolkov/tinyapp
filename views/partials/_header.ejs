@@ -6,15 +6,16 @@
     </button>
     <div style="text-align: right; clear: left;" class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div style="text-align: right; clear: left;"class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a font ="system-ui" class="nav-item nav-link" href="/urls">My URLs</a>
+        <a font="system-ui" class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <% if (!user) { %>
           <br>
-          <div>
-           <a class="navbar-brand" font="16px" padding="8px" style="color:#FFFFFF80" href="/login">Login</a>
-           <a class="navbar-brand" font="16px" padding="8px" style="color:#FFFFFF80" href="/register">Register</a>
+          <div class="nav-bar-nav">
+           <a class="btn btn-primary" font="16px" padding="8px" style="color:#FFFFFF80" href="/login">Login</a>
+           <a class="btn btn-outline-primary" font="16px" padding="8px" style="color:#FFFFFF80" href="/register">Register</a>
           </div> 
-        <% } else { %>
+        <% } %>
+        <% if (user) { %>
           <form class="form-inline my-1" method="POST" action="/logout">
             <div>
               Logged in as: <%= user.email %>
