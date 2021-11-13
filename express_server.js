@@ -19,7 +19,9 @@ const cookieSession = require("cookie-session");
 // app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
-  secret: 'bitcoin is the way'
+  secret: 'bitcoin is the way', 
+  maxAge:  24 * 60 * 60 * 1000
+  
 }))
 
 // sets template engine to ejs
@@ -119,8 +121,9 @@ app.post("/urls/:shortURL", (req, res) => {
     // if session id matches id in url database
     if (req.session.userID === urlDatabase[shortURL].userID){
       // then update the longURL and redirect to new page
-    urlDatabase[shortURL].longURL = req.body.newURL;
-    res.redirect(`/urls/${shortURL}`);
+    urlDatabase[shortURL].longURL = req.body.updatedURL;
+    console.log(req.body);
+    res.redirect(`/urls/${shortURL}`); 
     }
   }
 });
@@ -146,7 +149,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (longURL) {
-    res.redirect(longURL);
+    res.redirect(`http://${longURL}`);
   } else {
     res.status(404).send('<h1>404 Not Found</h1>The URL you are looking for does not exist.')
   }
@@ -172,8 +175,10 @@ app.post('/login', (req, res) => {
   const user = getUserByEmail(req.body.email, users);
   // if user exists
   if (user) { 
+    console.log(req.body.password, user);
+    
     // check if users's pw is correct using compareSync
-    if (req.body.password, user.password) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
       req.session.userID = user.userID;
       // if session user id matches database user id --> log user in and redirect to home page 
       res.redirect('/urls');
@@ -221,7 +226,7 @@ app.post('/register', (req, res) => {
       users[userID] = {
         userID,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body.password, 10)
         // new userid = random #, email comes from registration form, pw comes from registration form
       };
       req.session.userID = userID;
