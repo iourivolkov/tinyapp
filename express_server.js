@@ -160,7 +160,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // (GET) urls_login
 app.get("/login", (req, res) => {
-  // if session id exits = user is logged in --> redirect to main page
+  // if session id exists = user is logged in --> redirect to main page
   if (req.session.userID) {
     res.redirect('/urls');
     return;
