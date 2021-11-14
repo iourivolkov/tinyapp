@@ -1,40 +1,11 @@
-const users = {
-
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-
-  }
-};
-
-const urlDatabase = {
-
-  b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
-  },
-  i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "aJ48lW"
-
-  }
-};
-
-
-// pass in an email that exists in user database 
-// function returns the user object that contains that email 
+// pass in an email that exists in user database
+// function returns the user object that contains that email
 const getUserByEmail = (email, database) => {
-  for (const user in database) { 
+  for (const user in database) {
     if (database[user].email === email) {
       return database[user];
+    }
   }
-}
   return undefined;
 };
 
@@ -45,13 +16,13 @@ const generateRandomString = () => {
   const charLength = characters.length;
   const maxRandomStringLength = 6;
 
-  for(let i = 0; i < maxRandomStringLength; i++) {
+  for (let i = 0; i < maxRandomStringLength; i++) {
     output += characters.charAt(Math.floor(Math.random() * charLength));
   }
   return output;
-}
+};
 
-// returns new object containing all shortURLs for specific user 
+// returns new object containing all shortURLs for specific user
 const urlForUser = (id, database) => {
   let userUrls = {};
   for (const shortURL in database) {
@@ -60,6 +31,6 @@ const urlForUser = (id, database) => {
     }
   }
   return userUrls;
-}
+};
 
-module.exports = { getUserByEmail, generateRandomString, urlForUser}
+module.exports = { getUserByEmail, generateRandomString, urlForUser};
