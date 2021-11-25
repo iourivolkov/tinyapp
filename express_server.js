@@ -113,7 +113,16 @@ app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.userID;
   const userUrls = urlForUser(userID, urlDatabase);
   const templateVars = { urlDatabase, userUrls, shortURL, user: users[userID] };
-  res.render("urls_show", templateVars);
+
+  // if URL does not exist in urlDatabase -> alert user that the URL does not exist
+  if(!urlDatabase[shortURL]) {
+    res.status(404).send('<h1>404 Not Found </h1>*crickets*...This URL does not exist.');
+    // if user is not registered or shortURL does not belong to user --> alert user that they dont have permission to see the URL
+  } else if (!userID || !userUrls[shortURL]) {
+    res.status(401).send('<h1>401 Unauthorized </h1>Uh..oh..You do not have permission to see this URL.');
+  } else {
+    res.render("urls_show", templateVars);
+  }
 });
 
 
