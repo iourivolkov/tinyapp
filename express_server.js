@@ -115,11 +115,12 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { urlDatabase, userUrls, shortURL, user: users[userID] };
 
   // if URL does not exist in urlDatabase -> alert user that the URL does not exist
-  if(!urlDatabase[shortURL]) {
+  if (!urlDatabase[shortURL]) {
     res.status(404).send('<h1>404 Not Found </h1>*crickets*...This URL does not exist.');
-    // if user is not registered or shortURL does not belong to user --> alert user that they dont have permission to see the URL
+  // if user is not registered or shortURL does not belong to user --> alert user that they dont have permission to see the URL
   } else if (!userID || !userUrls[shortURL]) {
     res.status(401).send('<h1>401 Unauthorized </h1>Uh..oh..You do not have permission to see this URL.');
+  // otherwise, render the urls_show ejs template
   } else {
     res.render("urls_show", templateVars);
   }
@@ -129,7 +130,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // (POST) - route to update/edit a url in the database
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  // if session id exists
+  // if session user id exists
   if (req.session.userID) {
     // if session id matches id in url database
     if (req.session.userID === urlDatabase[shortURL].userID) {
