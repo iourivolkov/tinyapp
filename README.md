@@ -8,10 +8,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["Screenshot of the login page."](https://github.com/iourivolkov/tinyapp/blob/master/docs/urls_login-page.png?raw=true)
 
-!["Screenshot of the registration page"](https://github.com/iourivolkov/tinyapp/blob/master/docs/urls_register-page.png?raw=true)
-
 !["urls_index page"](https://github.com/iourivolkov/tinyapp/blob/master/docs/urls_index-page.png?raw=true)
-
 
 !["Screenshot of the URLs_show page"](https://github.com/iourivolkov/tinyapp/blob/master/docs/urls_show-page.png?raw=true)
 
